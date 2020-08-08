@@ -156,6 +156,11 @@ public abstract class BooleanFunction implements Function {
     }
 
     @Override
+    public long getNanoTimestamp(Record rec) {
+        return getBool(rec) ? 0 : 1;
+    }
+
+    @Override
     public final int getType() {
         return ColumnType.BOOLEAN;
     }

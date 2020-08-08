@@ -133,6 +133,9 @@ public class RecordCursorPrinter {
             case ColumnType.LONG256:
                 r.getLong256(i, sink);
                 break;
+            case ColumnType.NANOTIMESTAMP:
+                TimestampFormatUtils.appendDateTimeUSec(sink, r.getTimestamp(i));
+                break;
             default:
                 break;
         }

@@ -173,6 +173,18 @@ public class TimestampAddFunctionFactory implements FunctionFactory {
             }
             return Timestamps.addPeriod(l, c, r);
         }
+
+        @Override
+        public long getNanoTimestamp(Record rec) {
+            // !@#$
+            final long l = left.getNanoTimestamp(rec);
+            final char c = center.getChar(rec);
+            final int r = right.getInt(rec);
+            if (l == Numbers.LONG_NaN || r == Numbers.INT_NaN) {
+                return Numbers.LONG_NaN;
+            }
+            return Timestamps.addPeriod(l, c, r);
+        }
     }
 
     static {

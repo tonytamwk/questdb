@@ -66,6 +66,7 @@ public class SqlCompiler implements Closeable {
         castGroups.extendAndSet(ColumnType.DOUBLE, 1);
         castGroups.extendAndSet(ColumnType.DATE, 1);
         castGroups.extendAndSet(ColumnType.TIMESTAMP, 1);
+        castGroups.extendAndSet(ColumnType.NANOTIMESTAMP, 1);
         castGroups.extendAndSet(ColumnType.STRING, 3);
         castGroups.extendAndSet(ColumnType.SYMBOL, 3);
         castGroups.extendAndSet(ColumnType.BINARY, 4);
@@ -236,6 +237,7 @@ public class SqlCompiler implements Closeable {
         int rGetLong256 = asm.poolInterfaceMethod(Record.class, "getLong256A", "(I)Lio/questdb/std/Long256;");
         int rGetDate = asm.poolInterfaceMethod(Record.class, "getDate", "(I)J");
         int rGetTimestamp = asm.poolInterfaceMethod(Record.class, "getTimestamp", "(I)J");
+        int rGetNanoTimestamp = asm.poolInterfaceMethod(Record.class, "getNanoTimestamp", "(I)J");
         //
         int rGetByte = asm.poolInterfaceMethod(Record.class, "getByte", "(I)B");
         int rGetShort = asm.poolInterfaceMethod(Record.class, "getShort", "(I)S");
@@ -252,6 +254,7 @@ public class SqlCompiler implements Closeable {
         int wPutLong256 = asm.poolMethod(TableWriter.Row.class, "putLong256", "(ILio/questdb/std/Long256;)V");
         int wPutDate = asm.poolMethod(TableWriter.Row.class, "putDate", "(IJ)V");
         int wPutTimestamp = asm.poolMethod(TableWriter.Row.class, "putTimestamp", "(IJ)V");
+        int wPutNanoTimestamp = asm.poolMethod(TableWriter.Row.class, "putNanoTimestamp", "(IJ)V");
         //
         int wPutByte = asm.poolMethod(TableWriter.Row.class, "putByte", "(IB)V");
         int wPutShort = asm.poolMethod(TableWriter.Row.class, "putShort", "(IS)V");
@@ -310,6 +313,10 @@ public class SqlCompiler implements Closeable {
                             asm.i2l();
                             asm.invokeVirtual(wPutTimestamp);
                             break;
+                        case ColumnType.NANOTIMESTAMP:
+                            asm.i2l();
+                            asm.invokeVirtual(wPutNanoTimestamp);
+                            break;
                         case ColumnType.SHORT:
                             asm.i2s();
                             asm.invokeVirtual(wPutShort);
@@ -343,6 +350,9 @@ public class SqlCompiler implements Closeable {
                             break;
                         case ColumnType.TIMESTAMP:
                             asm.invokeVirtual(wPutTimestamp);
+                            break;
+                        case ColumnType.NANOTIMESTAMP:
+                            asm.invokeVirtual(wPutNanoTimestamp);
                             break;
                         case ColumnType.SHORT:
                             asm.l2i();
@@ -379,6 +389,9 @@ public class SqlCompiler implements Closeable {
                             break;
                         case ColumnType.TIMESTAMP:
                             asm.invokeVirtual(wPutTimestamp);
+                            break;
+                        case ColumnType.NANOTIMESTAMP:
+                            asm.invokeVirtual(wPutNanoTimestamp);
                             break;
                         case ColumnType.SHORT:
                             asm.l2i();
@@ -434,8 +447,50 @@ public class SqlCompiler implements Closeable {
                         case ColumnType.DATE:
                             asm.invokeVirtual(wPutDate);
                             break;
+                        case ColumnType.NANOTIMESTAMP:
+                            asm.invokeVirtual(wPutNanoTimestamp);
+                            break;
                         default:
                             asm.invokeVirtual(wPutTimestamp);
+                            break;
+                    }
+                    break;
+                case ColumnType.NANOTIMESTAMP:
+                    asm.invokeInterface(rGetNanoTimestamp, 1);
+                    switch (to.getColumnType(toColumnIndex)) {
+                        case ColumnType.INT:
+                            asm.l2i();
+                            asm.invokeVirtual(wPutInt);
+                            break;
+                        case ColumnType.LONG:
+                            asm.invokeVirtual(wPutLong);
+                            break;
+                        case ColumnType.SHORT:
+                            asm.l2i();
+                            asm.i2s();
+                            asm.invokeVirtual(wPutShort);
+                            break;
+                        case ColumnType.BYTE:
+                            asm.l2i();
+                            asm.i2b();
+                            asm.invokeVirtual(wPutByte);
+                            break;
+                        case ColumnType.FLOAT:
+                            asm.l2f();
+                            asm.invokeVirtual(wPutFloat);
+                            break;
+                        case ColumnType.DOUBLE:
+                            asm.l2d();
+                            asm.invokeVirtual(wPutDouble);
+                            break;
+                        case ColumnType.DATE:
+                            asm.invokeVirtual(wPutDate);
+                            break;
+                        case ColumnType.TIMESTAMP:
+                            asm.invokeVirtual(wPutTimestamp);
+                            break;
+                        default:
+                            asm.invokeVirtual(wPutNanoTimestamp);
                             break;
                     }
                     break;
@@ -456,6 +511,10 @@ public class SqlCompiler implements Closeable {
                         case ColumnType.TIMESTAMP:
                             asm.i2l();
                             asm.invokeVirtual(wPutTimestamp);
+                            break;
+                        case ColumnType.NANOTIMESTAMP:
+                            asm.i2l();
+                            asm.invokeVirtual(wPutNanoTimestamp);
                             break;
                         case ColumnType.SHORT:
                             asm.i2s();
@@ -491,6 +550,10 @@ public class SqlCompiler implements Closeable {
                         case ColumnType.TIMESTAMP:
                             asm.i2l();
                             asm.invokeVirtual(wPutTimestamp);
+                            break;
+                        case ColumnType.NANOTIMESTAMP:
+                            asm.i2l();
+                            asm.invokeVirtual(wPutNanoTimestamp);
                             break;
                         case ColumnType.BYTE:
                             asm.i2b();
@@ -532,6 +595,10 @@ public class SqlCompiler implements Closeable {
                             asm.f2l();
                             asm.invokeVirtual(wPutTimestamp);
                             break;
+                        case ColumnType.NANOTIMESTAMP:
+                            asm.f2l();
+                            asm.invokeVirtual(wPutNanoTimestamp);
+                            break;
                         case ColumnType.SHORT:
                             asm.f2i();
                             asm.i2s();
@@ -569,6 +636,10 @@ public class SqlCompiler implements Closeable {
                         case ColumnType.TIMESTAMP:
                             asm.d2l();
                             asm.invokeVirtual(wPutTimestamp);
+                            break;
+                        case ColumnType.NANOTIMESTAMP:
+                            asm.d2l();
+                            asm.invokeVirtual(wPutNanoTimestamp);
                             break;
                         case ColumnType.SHORT:
                             asm.d2i();

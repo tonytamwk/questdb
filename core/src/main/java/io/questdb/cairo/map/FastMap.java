@@ -142,6 +142,7 @@ public class FastMap implements Map {
                     case ColumnType.DOUBLE:
                     case ColumnType.DATE:
                     case ColumnType.TIMESTAMP:
+                    case ColumnType.NANOTIMESTAMP:
                         offset += 8;
                         break;
                     case ColumnType.LONG256:

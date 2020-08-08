@@ -134,6 +134,11 @@ public abstract class StrFunction implements Function {
     }
 
     @Override
+    public final long getNanoTimestamp(Record rec) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public final int getType() {
         return ColumnType.STRING;
     }

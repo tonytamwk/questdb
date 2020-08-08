@@ -40,6 +40,7 @@ public class TableModel implements TableStructure, Closeable {
     private final Path path = new Path();
     private final CairoConfiguration cairoCfg;
     private int timestampIndex = -1;
+    private int nanoTimestampIndex = -1;
 
     public TableModel(CairoConfiguration cairoCfg, String name, int partitionBy) {
         this.cairoCfg = cairoCfg;
@@ -136,6 +137,10 @@ public class TableModel implements TableStructure, Closeable {
         return timestampIndex;
     }
 
+    public int getNanoTimestampIndex() {
+        return nanoTimestampIndex;
+    }
+
     public TableModel indexed(boolean indexFlag, int indexBlockCapacity) {
         int pos = columnBits.size() - 1;
         assert pos > 0;
@@ -167,6 +172,17 @@ public class TableModel implements TableStructure, Closeable {
         assert timestampIndex == -1;
         timestampIndex = columnNames.size();
         col(name, ColumnType.TIMESTAMP);
+        return this;
+    }
+
+    public TableModel nanoTimestamp() {
+        return timestamp("nanotimestamp");
+    }
+
+    public TableModel nanoTimestamp(CharSequence name) {
+        assert nanoTimestampIndex == -1;
+        nanoTimestampIndex = columnNames.size();
+        col(name, ColumnType.NANOTIMESTAMP);
         return this;
     }
 }

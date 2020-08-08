@@ -137,6 +137,11 @@ public abstract class IntFunction implements Function {
     }
 
     @Override
+    public long getNanoTimestamp(Record rec) {
+        return getInt(rec);
+    }
+
+    @Override
     public final int getType() {
         return ColumnType.INT;
     }

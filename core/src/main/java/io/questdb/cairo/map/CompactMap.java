@@ -241,6 +241,7 @@ public class CompactMap implements Map {
                 case ColumnType.LONG:
                 case ColumnType.DATE:
                 case ColumnType.TIMESTAMP:
+                case ColumnType.NANOTIMESTAMP:
                 case ColumnType.STRING:
                 case ColumnType.BINARY:
                     sz = 8;

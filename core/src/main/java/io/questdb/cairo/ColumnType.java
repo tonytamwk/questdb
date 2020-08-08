@@ -48,11 +48,12 @@ public final class ColumnType {
     public static final int LONG256 = 12;
     public static final int BINARY = 13;
     public static final int PARAMETER = 14;
-    public static final int MAX = PARAMETER;
+    public static final int NANOTIMESTAMP = 15;
+    public static final int MAX = NANOTIMESTAMP;
     private static final IntObjHashMap<String> typeNameMap = new IntObjHashMap<>();
     private static final LowerCaseAsciiCharSequenceIntHashMap nameTypeMap = new LowerCaseAsciiCharSequenceIntHashMap();
-    private static final int[] TYPE_SIZE_POW2 = new int[ColumnType.PARAMETER + 1];
-    private static final int[] TYPE_SIZE = new int[ColumnType.PARAMETER + 1];
+    private static final int[] TYPE_SIZE_POW2 = new int[ColumnType.NANOTIMESTAMP + 1];
+    private static final int[] TYPE_SIZE = new int[ColumnType.NANOTIMESTAMP + 1];
 
     static {
         typeNameMap.put(BOOLEAN, "BOOLEAN");
@@ -71,6 +72,7 @@ public final class ColumnType {
         typeNameMap.put(TIMESTAMP, "TIMESTAMP");
         typeNameMap.put(TypeEx.CURSOR, "CURSOR");
         typeNameMap.put(LONG256, "LONG256");
+        typeNameMap.put(NANOTIMESTAMP, "NANOTIMESTAMP");
 
         nameTypeMap.put("boolean", BOOLEAN);
         nameTypeMap.put("byte", BYTE);
@@ -88,6 +90,7 @@ public final class ColumnType {
         nameTypeMap.put("timestamp", TIMESTAMP);
         nameTypeMap.put("cursor", TypeEx.CURSOR);
         nameTypeMap.put("long256", ColumnType.LONG256);
+        nameTypeMap.put("nanotimestamp", ColumnType.NANOTIMESTAMP);
 
         TYPE_SIZE_POW2[ColumnType.BOOLEAN] = 0;
         TYPE_SIZE_POW2[ColumnType.BYTE] = 0;
@@ -101,6 +104,7 @@ public final class ColumnType {
         TYPE_SIZE_POW2[ColumnType.DATE] = 3;
         TYPE_SIZE_POW2[ColumnType.TIMESTAMP] = 3;
         TYPE_SIZE_POW2[ColumnType.LONG256] = 5;
+        TYPE_SIZE_POW2[ColumnType.NANOTIMESTAMP] = 3;
 
         TYPE_SIZE[ColumnType.BOOLEAN] = Byte.BYTES;
         TYPE_SIZE[ColumnType.BYTE] = Byte.BYTES;
@@ -114,6 +118,7 @@ public final class ColumnType {
         TYPE_SIZE[ColumnType.DATE] = Long.BYTES;
         TYPE_SIZE[ColumnType.TIMESTAMP] = Long.BYTES;
         TYPE_SIZE[ColumnType.LONG256] = Long256.BYTES;
+        TYPE_SIZE[ColumnType.NANOTIMESTAMP] = Long.BYTES;
     }
 
     private ColumnType() {

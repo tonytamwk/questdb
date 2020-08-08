@@ -160,6 +160,11 @@ public class NamedParameterLinkFunction implements Function {
     }
 
     @Override
+    public long getNanoTimestamp(Record rec) {
+        return getBase().getNanoTimestamp(rec);
+    }
+
+    @Override
     public int getType() {
         return type;
     }

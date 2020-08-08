@@ -136,6 +136,11 @@ public abstract class Long256Function implements Function {
     }
 
     @Override
+    public final long getNanoTimestamp(Record rec) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public final long getLong(Record rec) {
         return getLong256A(rec).getLong0();
     }

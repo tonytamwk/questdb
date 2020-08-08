@@ -118,6 +118,10 @@ public interface Record {
         return getLong(col);
     }
 
+    default long getNanoTimestamp(int col) {
+        return getLong(col);
+    }
+
     @FunctionalInterface
     interface CharSequenceFunction {
         CharSequence get(Record record, int col);

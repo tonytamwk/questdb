@@ -287,6 +287,11 @@ public class RecordComparatorCompiler {
                     fieldType = "Lio/questdb/std/Long256;";
                     comparatorClass = Long256Util.class;
                     break;
+                case ColumnType.NANOTIMESTAMP:
+                    fieldType = "J";
+                    getterNameA = "getNanoTimestamp";
+                    comparatorClass = Long.class;
+                    break;
                 default:
                     // SYMBOL
                     getterNameA = "getSym";

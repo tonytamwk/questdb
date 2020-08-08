@@ -149,6 +149,12 @@ public abstract class DateFunction implements Function {
     }
 
     @Override
+    public final long getNanoTimestamp(Record rec) {
+        final long value = getDate(rec);
+        return value == Numbers.LONG_NaN ? value : value * 1000000L;
+    }
+
+    @Override
     public void getLong256(Record rec, CharSink sink) {
         throw new UnsupportedOperationException();
     }

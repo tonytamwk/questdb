@@ -255,6 +255,22 @@ public class TextMetadataParser implements JsonParser, Mutable, Closeable {
                 }
                 columnTypes.add(typeManager.nextTimestampAdapter(utf8, timestampFormatFactory.get(pattern), timestampLocale));
                 break;
+            case ColumnType.NANOTIMESTAMP:
+                timestampLocale =
+                        locale == null ?
+                                this.timestampLocale
+                                : timestampLocaleFactory.getLocale(locale);
+                if (timestampLocale == null) {
+                    throw JsonException.$(localePosition, "Invalid nanotimestamp locale");
+                }
+
+                // nanotimestamp pattern is required
+                if (pattern == null) {
+                    throw JsonException.$(0, "NANOTIMESTAMP format pattern is required");
+                }
+                //!@#$
+                columnTypes.add(typeManager.nextTimestampAdapter(utf8, timestampFormatFactory.get(pattern), timestampLocale));
+                break;
             default:
                 columnTypes.add(typeManager.getTypeAdapter(type));
                 break;

@@ -73,5 +73,15 @@ public class AddLongToTimestampFunctionFactory implements FunctionFactory {
             }
             return l + r;
         }
+
+        @Override
+        public long getNanoTimestamp(Record rec) {
+            final long l = left.getNanoTimestamp(rec);
+            final long r = right.getLong(rec);
+            if (l == Numbers.LONG_NaN || r == Numbers.LONG_NaN) {
+                return Numbers.LONG_NaN;
+            }
+            return l + r;
+        }
     }
 }

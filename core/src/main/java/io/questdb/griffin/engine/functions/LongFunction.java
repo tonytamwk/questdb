@@ -137,6 +137,11 @@ public abstract class LongFunction implements Function {
     }
 
     @Override
+    public final long getNanoTimestamp(Record rec) {
+        return getLong(rec);
+    }
+
+    @Override
     public final int getType() {
         return ColumnType.LONG;
     }

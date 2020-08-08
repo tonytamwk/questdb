@@ -83,7 +83,8 @@ public class CairoTestUtils {
                     .col("i", ColumnType.STRING)
                     .col("j", ColumnType.SYMBOL)
                     .col("k", ColumnType.BOOLEAN)
-                    .col("l", ColumnType.BINARY);
+                    .col("l", ColumnType.BINARY)
+                    .col("m", ColumnType.NANOTIMESTAMP);
             create(model);
         }
 

@@ -40,4 +40,10 @@ public class TimestampTypeConstant extends TimestampFunction implements TypeCons
     public long getTimestamp(Record rec) {
         return Numbers.LONG_NaN;
     }
+
+    @Override
+    public long getNanoTimestamp(Record rec) {
+        //!@#$
+        return Numbers.LONG_NaN;
+    }
 }

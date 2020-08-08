@@ -55,6 +55,7 @@ public class ConcatFunctionFactory implements FunctionFactory {
         adapterReferences.extendAndSet(ColumnType.BINARY, ConcatFunctionFactory::sinkBin);
         adapterReferences.extendAndSet(ColumnType.DATE, ConcatFunctionFactory::sinkDate);
         adapterReferences.extendAndSet(ColumnType.TIMESTAMP, ConcatFunctionFactory::sinkTimestamp);
+        adapterReferences.extendAndSet(ColumnType.NANOTIMESTAMP, ConcatFunctionFactory::sinkNanoTimestamp);
     }
 
     private static void sinkLong(CharSink sink, Function function, Record record) {
@@ -99,6 +100,10 @@ public class ConcatFunctionFactory implements FunctionFactory {
 
     private static void sinkTimestamp(CharSink sink, Function function, Record record) {
         sink.put(function.getTimestamp(record));
+    }
+
+    private static void sinkNanoTimestamp(CharSink sink, Function function, Record record) {
+        sink.put(function.getNanoTimestamp(record));
     }
 
     private static void sinkLong256(CharSink sink, Function function, Record record) {

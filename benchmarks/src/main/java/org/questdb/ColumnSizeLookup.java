@@ -74,6 +74,7 @@ public class ColumnSizeLookup {
             case ColumnType.LONG:
             case ColumnType.DATE:
             case ColumnType.TIMESTAMP:
+            case ColumnType.NANOTIMESTAMP:
                 return 8;
             case ColumnType.FLOAT:
             case ColumnType.INT:

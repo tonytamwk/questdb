@@ -122,6 +122,7 @@ public class JsonQueryProcessorState implements Mutable, Closeable {
         skewedValueWriters.extendAndSet(ColumnType.SYMBOL, this::putSkewedSymValue);
         skewedValueWriters.extendAndSet(ColumnType.BINARY, this::putSkewedBinValue);
         skewedValueWriters.extendAndSet(ColumnType.LONG256, this::putSkewedLong256Value);
+        skewedValueWriters.extendAndSet(ColumnType.NANOTIMESTAMP, this::putSkewedNanoTimestampValue);
 
         allValueWriters.extendAndSet(ColumnType.BOOLEAN, JsonQueryProcessorState::putBooleanValue);
         allValueWriters.extendAndSet(ColumnType.BYTE, JsonQueryProcessorState::putByteValue);
@@ -137,6 +138,7 @@ public class JsonQueryProcessorState implements Mutable, Closeable {
         allValueWriters.extendAndSet(ColumnType.SYMBOL, JsonQueryProcessorState::putSymValue);
         allValueWriters.extendAndSet(ColumnType.BINARY, JsonQueryProcessorState::putBinValue);
         allValueWriters.extendAndSet(ColumnType.LONG256, JsonQueryProcessorState::putLong256Value);
+        allValueWriters.extendAndSet(ColumnType.NANOTIMESTAMP, JsonQueryProcessorState::putNanoTimestampValue);
 
         this.nanosecondClock = nanosecondClock;
         this.floatScale = floatScale;
@@ -333,6 +335,15 @@ public class JsonQueryProcessorState implements Mutable, Closeable {
             return;
         }
         socket.put('"').putISODate(t).put('"');
+    }
+
+    private static void putNanoTimestampValue(HttpChunkedResponseSocket socket, Record rec, int col) {
+        final long t = rec.getNanoTimestamp(col);
+        if (t == Long.MIN_VALUE) {
+            socket.put("null");
+            return;
+        }
+        socket.put('"').putISODateNanos(t).put('"');
     }
 
     private boolean addColumnToOutput(RecordMetadata metadata, CharSequence columnNames, int start, int hi) throws PeerDisconnectedException, PeerIsSlowToReadException {
@@ -718,6 +729,10 @@ public class JsonQueryProcessorState implements Mutable, Closeable {
 
     private void putSkewedTimestampValue(HttpChunkedResponseSocket socket, Record rec, int col) {
         putTimestampValue(socket, rec, columnSkewList.getQuick(col));
+    }
+
+    private void putSkewedNanoTimestampValue(HttpChunkedResponseSocket socket, Record rec, int col) {
+        putNanoTimestampValue(socket, rec, columnSkewList.getQuick(col));
     }
 
     void resume(HttpChunkedResponseSocket socket) throws PeerDisconnectedException, PeerIsSlowToReadException {

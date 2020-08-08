@@ -46,6 +46,7 @@ public class SwitchFunctionFactory implements FunctionFactory {
     private static final IntMethod GET_CHAR = SwitchFunctionFactory::getChar;
     private static final LongMethod GET_DATE = SwitchFunctionFactory::getDate;
     private static final LongMethod GET_TIMESTAMP = SwitchFunctionFactory::getTimestamp;
+    private static final LongMethod GET_NANOTIMESTAMP = SwitchFunctionFactory::getNanoTimestamp;
     private static final CharSequenceMethod GET_STRING = SwitchFunctionFactory::getString;
     private static final CharSequenceMethod GET_SYMBOL = SwitchFunctionFactory::getSymbol;
 
@@ -75,6 +76,10 @@ public class SwitchFunctionFactory implements FunctionFactory {
 
     private static long getTimestamp(Function function, Record record) {
         return function.getTimestamp(record);
+    }
+
+    private static long getNanoTimestamp(Function function, Record record) {
+        return function.getNanoTimestamp(record);
     }
 
     private static CharSequence getString(Function function, Record record) {
@@ -151,6 +156,8 @@ public class SwitchFunctionFactory implements FunctionFactory {
                 return getLongKeyedFunction(args, position, n, keyFunction, returnType, elseBranch, GET_DATE);
             case ColumnType.TIMESTAMP:
                 return getLongKeyedFunction(args, position, n, keyFunction, returnType, elseBranch, GET_TIMESTAMP);
+            case ColumnType.NANOTIMESTAMP:
+                return getLongKeyedFunction(args, position, n, keyFunction, returnType, elseBranch, GET_NANOTIMESTAMP);
             case ColumnType.BOOLEAN:
                 return getIfElseFunction(args, position, n, keyFunction, returnType, elseBranch);
             case ColumnType.STRING:

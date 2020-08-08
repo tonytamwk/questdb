@@ -92,6 +92,11 @@ final class FastMapValue implements MapValue {
     }
 
     @Override
+    public long getNanoTimestamp(int index) {
+        return getLong(index);
+    }
+
+    @Override
     public boolean isNew() {
         return _new;
     }
@@ -179,6 +184,11 @@ final class FastMapValue implements MapValue {
 
     @Override
     public void putTimestamp(int index, long value) {
+        putLong(index, value);
+    }
+
+    @Override
+    public void putNanoTimestamp(int index, long value) {
         putLong(index, value);
     }
 

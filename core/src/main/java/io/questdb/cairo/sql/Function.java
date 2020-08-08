@@ -83,6 +83,8 @@ public interface Function extends Closeable {
 
     long getTimestamp(Record rec);
 
+    long getNanoTimestamp(Record rec);
+
     int getType();
 
     default void init(SymbolTableSource symbolTableSource, SqlExecutionContext executionContext) {

@@ -148,6 +148,11 @@ public class RecordSinkFactory {
                     asm.invokeInterface(rGetLong256, 1);
                     asm.invokeInterface(wPutLong256, 1);
                     break;
+                case ColumnType.NANOTIMESTAMP:
+                    //!@#$
+                    asm.invokeInterface(rGetTimestamp, 1);
+                    asm.invokeInterface(wPutTimestamp, 2);
+                    break;
                 default:
                     break;
             }

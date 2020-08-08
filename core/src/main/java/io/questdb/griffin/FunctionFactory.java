@@ -54,6 +54,7 @@ public interface FunctionFactory {
      * <li>V = variable argument list</li>
      * <li>C = cursor</li>
      * <li>H = long256</li>
+     * <li>O = nanotimestamp</li>
      * </ul>
      *
      * Lower-case letters will require arguments to be constant expressions. Upper-case letters allow both constant and

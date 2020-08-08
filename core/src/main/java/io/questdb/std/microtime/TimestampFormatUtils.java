@@ -36,6 +36,7 @@ public class TimestampFormatUtils {
     public static final int HOUR_AM = 0;
     public static final TimestampFormat UTC_FORMAT;
     public static final TimestampFormat USEC_UTC_FORMAT;
+    public static final TimestampFormat NSEC_UTC_FORMAT;
     public static final TimestampFormat PG_TIMESTAMP_FORMAT;
     public static final String UTC_PATTERN = "yyyy-MM-ddTHH:mm:ss.SSSz";
     public static final TimestampLocale enLocale = TimestampLocaleFactory.INSTANCE.getLocale("en");
@@ -53,6 +54,7 @@ public class TimestampFormatUtils {
         UTC_FORMAT = compiler.compile(UTC_PATTERN);
         HTTP_FORMAT = compiler.compile("E, d MMM yyyy HH:mm:ss Z");
         USEC_UTC_FORMAT = compiler.compile("yyyy-MM-ddTHH:mm:ss.SSSUUUz");
+        NSEC_UTC_FORMAT = compiler.compile("yyyy-MM-ddTHH:mm:ss.SSSUUUNNNz");
         PG_TIMESTAMP_FORMAT = compiler.compile("yyyy-MM-dd HH:mm:ss.SSSUUU");
     }
 
@@ -99,6 +101,14 @@ public class TimestampFormatUtils {
             return;
         }
         USEC_UTC_FORMAT.format(micros, null, "Z", sink);
+    }
+
+    // YYYY-MM-DDThh:mm:ss.mmmuuunnnZ
+    public static void appendDateTimeNSec(CharSink sink, long nanos) {
+        if (nanos == Long.MIN_VALUE) {
+            return;
+        }
+        NSEC_UTC_FORMAT.format(nanos, null, "Z", sink);
     }
 
     // YYYY-MM-DD

@@ -151,6 +151,12 @@ public abstract class AbstractCharSink implements CharSink {
     }
 
     @Override
+    public CharSink putISODateNanos(long value) {
+        TimestampFormatUtils.appendDateTimeNSec(this, value);
+        return this;
+    }
+
+    @Override
     public CharSink putISODateMillis(long value) {
         io.questdb.std.time.DateFormatUtils.appendDateTime(this, value);
         return this;

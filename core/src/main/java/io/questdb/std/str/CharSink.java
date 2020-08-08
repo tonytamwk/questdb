@@ -67,6 +67,8 @@ public interface CharSink {
 
     CharSink putISODate(long value);
 
+    CharSink putISODateNanos(long value);
+
     CharSink putISODateMillis(long value);
 
     CharSink putQuoted(CharSequence cs);

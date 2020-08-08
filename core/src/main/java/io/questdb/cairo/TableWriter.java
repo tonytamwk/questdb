@@ -1400,6 +1400,7 @@ public class TableWriter implements Closeable {
             case ColumnType.LONG:
             case ColumnType.DATE:
             case ColumnType.TIMESTAMP:
+            case ColumnType.NANOTIMESTAMP:
                 nullers.add(() -> mem1.putLong(Numbers.LONG_NaN));
                 break;
             case ColumnType.LONG256:
@@ -2906,6 +2907,10 @@ public class TableWriter implements Closeable {
         }
 
         public void putTimestamp(int index, long value) {
+            putLong(index, value);
+        }
+
+        public void putNanoTimestamp(int index, long value) {
             putLong(index, value);
         }
 

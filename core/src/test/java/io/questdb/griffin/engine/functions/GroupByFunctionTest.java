@@ -156,6 +156,11 @@ public class GroupByFunctionTest {
         }
 
         @Override
+        public long getNanoTimestamp(Record rec) {
+            return 0;
+        }
+
+        @Override
         public Long256 getLong256A(Record rec) {
             return null;
         }

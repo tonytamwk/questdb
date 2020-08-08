@@ -158,6 +158,11 @@ public class CursorFunction implements Function {
     }
 
     @Override
+    public final long getNanoTimestamp(Record rec) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void getLong256(Record rec, CharSink sink) {
         throw new UnsupportedOperationException();
     }

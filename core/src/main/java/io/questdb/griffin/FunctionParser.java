@@ -120,6 +120,9 @@ public class FunctionParser implements PostOrderTreeTraversalAlgo.Visitor {
             case 'N':
                 sigArgType = ColumnType.TIMESTAMP;
                 break;
+            case 'O':
+                sigArgType = ColumnType.NANOTIMESTAMP;
+                break;
             case 'U':
                 sigArgType = ColumnType.BINARY;
                 break;
@@ -436,6 +439,8 @@ public class FunctionParser implements PostOrderTreeTraversalAlgo.Visitor {
                 return new DateColumn(node.position, index);
             case ColumnType.TIMESTAMP:
                 return new TimestampColumn(node.position, index);
+            case ColumnType.NANOTIMESTAMP:
+                return new NanoTimestampColumn(node.position, index);
             default:
                 return new Long256Column(node.position, index);
         }
@@ -781,6 +786,12 @@ public class FunctionParser implements PostOrderTreeTraversalAlgo.Visitor {
                     return function;
                 } else {
                     return new TimestampConstant(position, function.getTimestamp(null));
+                }
+            case ColumnType.NANOTIMESTAMP:
+                if (function instanceof NanoTimestampConstant) {
+                    return function;
+                } else {
+                    return new NanoTimestampConstant(position, function.getTimestamp(null));
                 }
             default:
                 return function;

@@ -102,6 +102,11 @@ public class RecordValueSinkFactory {
                     asm.invokeInterface(rGetTimestamp, 1);
                     asm.invokeInterface(wPutTimestamp, 3);
                     break;
+                case ColumnType.NANOTIMESTAMP:
+                    // !@#$
+                    asm.invokeInterface(rGetTimestamp, 1);
+                    asm.invokeInterface(wPutTimestamp, 3);
+                    break;
                 case ColumnType.BYTE:
                     asm.invokeInterface(rGetByte, 1);
                     asm.invokeInterface(wPutByte, 2);

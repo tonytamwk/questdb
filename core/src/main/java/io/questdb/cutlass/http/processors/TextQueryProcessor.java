@@ -443,6 +443,12 @@ public class TextQueryProcessor implements HttpRequestProcessor, Closeable {
             case ColumnType.LONG256:
                 rec.getLong256(col, socket);
                 break;
+            case ColumnType.NANOTIMESTAMP:
+                l = rec.getNanoTimestamp(col);
+                if (l > Long.MIN_VALUE) {
+                    socket.put('"').putISODateNanos(l).put('"');
+                }
+                break;
             default:
                 assert false;
         }

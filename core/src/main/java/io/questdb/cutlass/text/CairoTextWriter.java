@@ -61,6 +61,7 @@ public class CairoTextWriter implements Closeable, Mutable {
     private TimestampAdapter timestampAdapter;
     private final TextLexer.Listener partitionedListener = this::onFieldsPartitioned;
     private final ObjectPool<DateToTimestampAdapter> dateToTimestampAdapterPool = new ObjectPool<>(DateToTimestampAdapter::new, 4);
+    private final ObjectPool<DateToNanoTimestampAdapter> dateToNanoTimestampAdapterPool = new ObjectPool<>(DateToNanoTimestampAdapter::new, 4);
 
     public CairoTextWriter(
             CairoEngine engine,
@@ -267,6 +268,15 @@ public class CairoTextWriter implements Closeable, Mutable {
                     case ColumnType.BINARY:
                         writer.close();
                         throw CairoException.instance(0).put("cannot import text into BINARY column [index=").put(i).put(']');
+                    case ColumnType.NANOTIMESTAMP:
+                        // !@#$
+                        if (detectedType == ColumnType.DATE) {
+                            this.types.setQuick(i, dateToTimestampAdapterPool.next().of((DateAdapter) this.types.getQuick(i)));
+                        } else {
+                            logTypeError(i);
+                            this.types.setQuick(i, BadNanoTimestampAdapter.INSTANCE);
+                        }
+                        break;
                     default:
                         this.types.setQuick(i, typeManager.getTypeAdapter(columnType));
                         break;

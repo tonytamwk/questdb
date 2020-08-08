@@ -147,6 +147,11 @@ public abstract class ByteFunction implements Function {
     }
 
     @Override
+    public final long getNanoTimestamp(Record rec) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public final void getLong256(Record rec, CharSink sink) {
         throw new UnsupportedOperationException();
     }

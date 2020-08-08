@@ -63,6 +63,8 @@ public class EqDoubleFunctionFactory extends AbstractBooleanFunctionFactory impl
                     return new FuncDateIsNaN(position, right, isNegated);
                 case ColumnType.TIMESTAMP:
                     return new FuncTimestampIsNaN(position, right, isNegated);
+                case ColumnType.NANOTIMESTAMP:
+                    return new FuncNanoTimestampIsNaN(position, right, isNegated);
                 case ColumnType.FLOAT:
                     return new FuncFloatIsNaN(position, right, isNegated);
                 default:
@@ -79,6 +81,8 @@ public class EqDoubleFunctionFactory extends AbstractBooleanFunctionFactory impl
                     return new FuncDateIsNaN(position, left, isNegated);
                 case ColumnType.TIMESTAMP:
                     return new FuncTimestampIsNaN(position, left, isNegated);
+                case ColumnType.NANOTIMESTAMP:
+                    return new FuncNanoTimestampIsNaN(position, left, isNegated);
                 case ColumnType.FLOAT:
                     return new FuncFloatIsNaN(position, left, isNegated);
                 default:
@@ -195,6 +199,27 @@ public class EqDoubleFunctionFactory extends AbstractBooleanFunctionFactory impl
         @Override
         public boolean getBool(Record rec) {
             return isNegated != (arg.getTimestamp(rec) == Numbers.LONG_NaN);
+        }
+
+        @Override
+        public Function getArg() {
+            return arg;
+        }
+    }
+
+    protected static class FuncNanoTimestampIsNaN extends BooleanFunction implements UnaryFunction {
+        private final boolean isNegated;
+        protected final Function arg;
+
+        public FuncNanoTimestampIsNaN(int position, Function arg, boolean isNegated) {
+            super(position);
+            this.arg = arg;
+            this.isNegated = isNegated;
+        }
+
+        @Override
+        public boolean getBool(Record rec) {
+            return isNegated != (arg.getNanoTimestamp(rec) == Numbers.LONG_NaN);
         }
 
         @Override

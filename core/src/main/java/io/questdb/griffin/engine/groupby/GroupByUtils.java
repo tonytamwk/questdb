@@ -243,6 +243,9 @@ public class GroupByUtils {
                         case ColumnType.LONG256:
                             fun = new Long256Column(node.position, keyColumnIndex - 1);
                             break;
+                        case ColumnType.NANOTIMESTAMP:
+                            fun = new NanoTimestampColumn(node.position, keyColumnIndex - 1);
+                            break;
                         default:
                             fun = new BinColumn(node.position, keyColumnIndex - 1);
                             break;

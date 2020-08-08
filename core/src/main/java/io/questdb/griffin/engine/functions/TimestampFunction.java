@@ -140,6 +140,13 @@ public abstract class TimestampFunction implements Function {
     }
 
     @Override
+    public long getNanoTimestamp(Record rec) {
+        //!@#$
+        final long value = getTimestamp(rec);
+        return value == Numbers.LONG_NaN ? value : value / 1000000L;
+    }
+
+    @Override
     public final int getType() {
         return ColumnType.TIMESTAMP;
     }

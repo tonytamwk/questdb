@@ -90,6 +90,11 @@ public class SimpleMapValue implements MapValue {
     }
 
     @Override
+    public long getNanoTimestamp(int index) {
+        return values[index];
+    }
+
+    @Override
     public boolean isNew() {
         return false;
     }
@@ -173,6 +178,11 @@ public class SimpleMapValue implements MapValue {
 
     @Override
     public void putTimestamp(int index, long value) {
+        values[index] = value;
+    }
+
+    @Override
+    public void putNanoTimestamp(int index, long value) {
         values[index] = value;
     }
 

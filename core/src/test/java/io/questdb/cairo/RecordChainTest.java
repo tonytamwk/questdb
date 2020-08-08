@@ -208,6 +208,10 @@ public class RecordChainTest extends AbstractCairoTest {
                 case ColumnType.BINARY:
                     TestUtils.assertEquals(expected.getBin(i), actual.getBin(i), actual.getBinLen(i));
                     break;
+                case ColumnType.NANOTIMESTAMP:
+                    Assert.assertEquals(expected.getNanoTimestamp(i), actual.getNanoTimestamp(i));
+                    break;
+
                 default:
                     throw CairoException.instance(0).put("Record chain does not support: ").put(ColumnType.nameOf(metadata.getColumnType(i)));
 
