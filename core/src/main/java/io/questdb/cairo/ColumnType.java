@@ -141,7 +141,7 @@ public final class ColumnType {
     }
 
     public static int sizeOf(int columnType) {
-        if (columnType < 0 || columnType > ColumnType.PARAMETER) {
+        if (columnType < 0 || columnType > ColumnType.NANOTIMESTAMP) {
             return -1;
         }
         return TYPE_SIZE[columnType];
