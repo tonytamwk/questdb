@@ -29,15 +29,14 @@ import io.questdb.cairo.TableWriter;
 import io.questdb.cutlass.text.TextUtil;
 import io.questdb.std.Mutable;
 import io.questdb.std.NumericException;
-import io.questdb.std.microtime.NanoTimestampFormat;
-import io.questdb.std.microtime.TimestampFormat;
-import io.questdb.std.microtime.TimestampLocale;
+import io.questdb.std.nanotime.NanoTimestampFormat;
+import io.questdb.std.nanotime.NanoTimestampLocale;
 import io.questdb.std.str.DirectByteCharSequence;
 import io.questdb.std.str.DirectCharSink;
 
 public class NanoTimestampUtf8Adapter extends AbstractTypeAdapter implements Mutable {
     private final DirectCharSink utf8Sink;
-    private TimestampLocale locale;
+    private NanoTimestampLocale locale;
     private NanoTimestampFormat format;
 
     public NanoTimestampUtf8Adapter(DirectCharSink utf8Sink) {
@@ -72,7 +71,7 @@ public class NanoTimestampUtf8Adapter extends AbstractTypeAdapter implements Mut
         row.putDate(column, format.parse(utf8Sink, locale));
     }
 
-    public NanoTimestampUtf8Adapter of(NanoTimestampFormat format, TimestampLocale locale) {
+    public NanoTimestampUtf8Adapter of(NanoTimestampFormat format, NanoTimestampLocale locale) {
         this.format = format;
         this.locale = locale;
         return this;

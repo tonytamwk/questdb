@@ -423,6 +423,12 @@ public class TextQueryProcessor implements HttpRequestProcessor, Closeable {
                     socket.put('"').putISODate(l).put('"');
                 }
                 break;
+            case ColumnType.NANOTIMESTAMP:
+                l = rec.getNanoTimestamp(col);
+                if (l > Long.MIN_VALUE) {
+                    socket.put('"').putISODateNanos(l).put('"');
+                }
+                break;
             case ColumnType.SHORT:
                 socket.put(rec.getShort(col));
                 break;
@@ -442,12 +448,6 @@ public class TextQueryProcessor implements HttpRequestProcessor, Closeable {
                 break;
             case ColumnType.LONG256:
                 rec.getLong256(col, socket);
-                break;
-            case ColumnType.NANOTIMESTAMP:
-                l = rec.getNanoTimestamp(col);
-                if (l > Long.MIN_VALUE) {
-                    socket.put('"').putISODateNanos(l).put('"');
-                }
                 break;
             default:
                 assert false;

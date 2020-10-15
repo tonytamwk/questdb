@@ -22,16 +22,22 @@
  *
  ******************************************************************************/
 
-package io.questdb.std.microtime;
+package io.questdb.std.nanotime;
 
-import io.questdb.std.NumericException;
-import io.questdb.std.str.CharSink;
+public class FixedTimeZoneRule implements TimeZoneRules {
+    private final long offset;
 
-public interface NanoTimestampFormat {
+    public FixedTimeZoneRule(long offset) {
+        this.offset = offset;
+    }
 
-    void format(long nanos, TimestampLocale locale, CharSequence timeZoneName, CharSink sink);
+    @Override
+    public long getOffset(long millis, int year, boolean leap) {
+        return offset;
+    }
 
-    long parse(CharSequence in, TimestampLocale locale) throws NumericException;
-
-    long parse(CharSequence in, int lo, int hi, TimestampLocale locale) throws NumericException;
+    @Override
+    public long getOffset(long millis) {
+        return offset;
+    }
 }

@@ -41,19 +41,19 @@ public final class ColumnType {
     public static final int LONG = 5;
     public static final int DATE = 6;
     public static final int TIMESTAMP = 7;
-    public static final int FLOAT = 8;
-    public static final int DOUBLE = 9;
-    public static final int STRING = 10;
-    public static final int SYMBOL = 11;
-    public static final int LONG256 = 12;
-    public static final int BINARY = 13;
-    public static final int PARAMETER = 14;
-    public static final int NANOTIMESTAMP = 15;
-    public static final int MAX = NANOTIMESTAMP;
+    public static final int NANOTIMESTAMP = 8;
+    public static final int FLOAT = 9;
+    public static final int DOUBLE = 10;
+    public static final int STRING = 11;
+    public static final int SYMBOL = 12;
+    public static final int LONG256 = 13;
+    public static final int BINARY = 14;
+    public static final int PARAMETER = 15;
+    public static final int MAX = PARAMETER;
     private static final IntObjHashMap<String> typeNameMap = new IntObjHashMap<>();
     private static final LowerCaseAsciiCharSequenceIntHashMap nameTypeMap = new LowerCaseAsciiCharSequenceIntHashMap();
-    private static final int[] TYPE_SIZE_POW2 = new int[ColumnType.NANOTIMESTAMP + 1];
-    private static final int[] TYPE_SIZE = new int[ColumnType.NANOTIMESTAMP + 1];
+    private static final int[] TYPE_SIZE_POW2 = new int[ColumnType.MAX + 1];
+    private static final int[] TYPE_SIZE = new int[ColumnType.MAX + 1];
 
     static {
         typeNameMap.put(BOOLEAN, "BOOLEAN");
@@ -88,9 +88,9 @@ public final class ColumnType {
         nameTypeMap.put("date", DATE);
         nameTypeMap.put("parameter", PARAMETER);
         nameTypeMap.put("timestamp", TIMESTAMP);
+        nameTypeMap.put("nanotimestamp", ColumnType.NANOTIMESTAMP);
         nameTypeMap.put("cursor", TypeEx.CURSOR);
         nameTypeMap.put("long256", ColumnType.LONG256);
-        nameTypeMap.put("nanotimestamp", ColumnType.NANOTIMESTAMP);
 
         TYPE_SIZE_POW2[ColumnType.BOOLEAN] = 0;
         TYPE_SIZE_POW2[ColumnType.BYTE] = 0;
@@ -103,8 +103,8 @@ public final class ColumnType {
         TYPE_SIZE_POW2[ColumnType.LONG] = 3;
         TYPE_SIZE_POW2[ColumnType.DATE] = 3;
         TYPE_SIZE_POW2[ColumnType.TIMESTAMP] = 3;
-        TYPE_SIZE_POW2[ColumnType.LONG256] = 5;
         TYPE_SIZE_POW2[ColumnType.NANOTIMESTAMP] = 3;
+        TYPE_SIZE_POW2[ColumnType.LONG256] = 5;
 
         TYPE_SIZE[ColumnType.BOOLEAN] = Byte.BYTES;
         TYPE_SIZE[ColumnType.BYTE] = Byte.BYTES;
@@ -117,8 +117,8 @@ public final class ColumnType {
         TYPE_SIZE[ColumnType.LONG] = Long.BYTES;
         TYPE_SIZE[ColumnType.DATE] = Long.BYTES;
         TYPE_SIZE[ColumnType.TIMESTAMP] = Long.BYTES;
-        TYPE_SIZE[ColumnType.LONG256] = Long256.BYTES;
         TYPE_SIZE[ColumnType.NANOTIMESTAMP] = Long.BYTES;
+        TYPE_SIZE[ColumnType.LONG256] = Long256.BYTES;
     }
 
     private ColumnType() {
@@ -141,7 +141,7 @@ public final class ColumnType {
     }
 
     public static int sizeOf(int columnType) {
-        if (columnType < 0 || columnType > ColumnType.NANOTIMESTAMP) {
+        if (columnType < 0 || columnType > ColumnType.MAX) {
             return -1;
         }
         return TYPE_SIZE[columnType];

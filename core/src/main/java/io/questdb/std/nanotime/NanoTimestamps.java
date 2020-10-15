@@ -22,7 +22,7 @@
  *
  ******************************************************************************/
 
-package io.questdb.std.microtime;
+package io.questdb.std.nanotime;
 
 import io.questdb.std.Chars;
 import io.questdb.std.Misc;
@@ -30,15 +30,20 @@ import io.questdb.std.Numbers;
 import io.questdb.std.NumericException;
 import io.questdb.std.str.CharSink;
 
-final public class Timestamps {
+import java.math.BigInteger;
 
-    public static final long WEEK_MICROS = 604800000000L;
-    public static final long DAY_MICROS = 86400000000L;
-    public static final long HOUR_MICROS = 3600000000L;
-    public static final long MINUTE_MICROS = 60000000;
+final public class NanoTimestamps {
+
+    public static final long WEEK_NANOS = 604800000000000L;
+    public static final long DAY_NANOS = 86400000000000L;
+    public static final long HOUR_NANOS = 3600000000000L;
+    public static final long MINUTE_NANOS = 60000000000L;
+    public static final long SECOND_NANOS = 1000000000;
     public static final long SECOND_MICROS = 1000000;
     public static final int SECOND_MILLIS = 1000;
     public static final int MILLI_MICROS = 1000;
+    public static final int MILLI_NANOS = 1000000;
+    public static final int MICROS_NANOS = 1000;
     public static final int STATE_INIT = 0;
     public static final int STATE_UTC = 1;
     public static final int STATE_GMT = 2;
@@ -47,27 +52,29 @@ final public class Timestamps {
     public static final int STATE_MINUTE = 5;
     public static final int STATE_END = 6;
     public static final int STATE_SIGN = 7;
-    public static final TimestampFloorMethod FLOOR_DD = Timestamps::floorDD;
-    public static final TimestampAddMethod ADD_DD = Timestamps::addDays;
-    private static final long AVG_YEAR_MICROS = (long) (365.2425 * DAY_MICROS);
-    private static final long YEAR_MICROS = 365 * DAY_MICROS;
-    private static final long LEAP_YEAR_MICROS = 366 * DAY_MICROS;
-    private static final long HALF_YEAR_MICROS = AVG_YEAR_MICROS / 2;
-    private static final long EPOCH_MICROS = 1970L * AVG_YEAR_MICROS;
-    private static final long HALF_EPOCH_MICROS = EPOCH_MICROS / 2;
+    public static final TimestampFloorMethod FLOOR_DD = NanoTimestamps::floorDD;
+    public static final TimestampAddMethod ADD_DD = NanoTimestamps::addDays;
+    private static final long AVG_YEAR_NANOS = (long) (365.2425 * DAY_NANOS);
+    private static final long YEAR_NANOS = 365 * DAY_NANOS;
+    private static final long LEAP_YEAR_NANOS = 366 * DAY_NANOS;
+    private static final long HALF_YEAR_NANOS = AVG_YEAR_NANOS / 2;
+    private static final long EPOCH_NANOS = 1970L * AVG_YEAR_NANOS;
+    private static final BigInteger EPOCH_NANOS_BIG = new BigInteger(String.valueOf(AVG_YEAR_NANOS)).multiply(new BigInteger("1970"));
+    private static final long HALF_EPOCH_NANOS = EPOCH_NANOS / 2;
+    private static final BigInteger HALF_EPOCH_NANOS_BIG = EPOCH_NANOS_BIG.divide(new BigInteger("2"));
     private static final int DAY_HOURS = 24;
     private static final int HOUR_MINUTES = 60;
     private static final int MINUTE_SECONDS = 60;
     private static final int DAYS_0000_TO_1970 = 719527;
-    public static final TimestampFloorMethod FLOOR_YYYY = Timestamps::floorYYYY;
+    public static final TimestampFloorMethod FLOOR_YYYY = NanoTimestamps::floorYYYY;
     private static final int[] DAYS_PER_MONTH = {
             31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
     };
-    private static final long[] MIN_MONTH_OF_YEAR_MICROS = new long[12];
-    private static final long[] MAX_MONTH_OF_YEAR_MICROS = new long[12];
-    public static final TimestampFloorMethod FLOOR_MM = Timestamps::floorMM;
-    public static final TimestampAddMethod ADD_MM = Timestamps::addMonths;
-    public static final TimestampAddMethod ADD_YYYY = Timestamps::addYear;
+    private static final long[] MIN_MONTH_OF_YEAR_NANOS = new long[12];
+    private static final long[] MAX_MONTH_OF_YEAR_NANOS = new long[12];
+    public static final TimestampFloorMethod FLOOR_MM = NanoTimestamps::floorMM;
+    public static final TimestampAddMethod ADD_MM = NanoTimestamps::addMonths;
+    public static final TimestampAddMethod ADD_YYYY = NanoTimestamps::addYear;
     private static final char BEFORE_ZERO = '0' - 1;
     private static final char AFTER_NINE = '9' + 1;
 
@@ -75,35 +82,35 @@ final public class Timestamps {
         long minSum = 0;
         long maxSum = 0;
         for (int i = 0; i < 11; i++) {
-            minSum += DAYS_PER_MONTH[i] * DAY_MICROS;
-            MIN_MONTH_OF_YEAR_MICROS[i + 1] = minSum;
-            maxSum += getDaysPerMonth(i + 1, true) * DAY_MICROS;
-            MAX_MONTH_OF_YEAR_MICROS[i + 1] = maxSum;
+            minSum += DAYS_PER_MONTH[i] * DAY_NANOS;
+            MIN_MONTH_OF_YEAR_NANOS[i + 1] = minSum;
+            maxSum += getDaysPerMonth(i + 1, true) * DAY_NANOS;
+            MAX_MONTH_OF_YEAR_NANOS[i + 1] = maxSum;
         }
     }
 
-    private Timestamps() {
+    private NanoTimestamps() {
     }
 
-    public static long addDays(long micros, int days) {
-        return micros + days * DAY_MICROS;
+    public static long addDays(long nanos, int days) {
+        return nanos + days * DAY_NANOS;
     }
 
-    public static long addHours(long micros, int hours) {
-        return micros + hours * HOUR_MICROS;
+    public static long addHours(long nanos, int hours) {
+        return nanos + hours * HOUR_NANOS;
     }
 
-    public static long addMinutes(long micros, int minutes) {
-        return micros + minutes * MINUTE_MICROS;
+    public static long addMinutes(long nanos, int minutes) {
+        return nanos + minutes * MINUTE_NANOS;
     }
 
-    public static long addMonths(final long micros, int months) {
+    public static long addMonths(final long nanos, int months) {
         if (months == 0) {
-            return micros;
+            return nanos;
         }
-        int y = Timestamps.getYear(micros);
-        boolean l = Timestamps.isLeapYear(y);
-        int m = getMonthOfYear(micros, y, l);
+        int y = NanoTimestamps.getYear(nanos);
+        boolean l = NanoTimestamps.isLeapYear(y);
+        int m = getMonthOfYear(nanos, y, l);
         int _y;
         int _m = m - 1 + months;
         if (_m > -1) {
@@ -120,139 +127,139 @@ final public class Timestamps {
                 _y += 1;
             }
         }
-        int _d = getDayOfMonth(micros, y, m, l);
+        int _d = getDayOfMonth(nanos, y, m, l);
         int maxDay = getDaysPerMonth(_m, isLeapYear(_y));
         if (_d > maxDay) {
             _d = maxDay;
         }
-        return toMicros(_y, _m, _d) + getTimeMicros(micros) + (micros < 0 ? 1 : 0);
+        return toNanos(_y, _m, _d) + getTimeNanos(nanos) + (nanos < 0 ? 1 : 0);
     }
 
     public static long addPeriod(long lo, char type, int period) {
         switch (type) {
             case 's':
-                return Timestamps.addSeconds(lo, period);
+                return NanoTimestamps.addSeconds(lo, period);
             case 'm':
-                return Timestamps.addMinutes(lo, period);
+                return NanoTimestamps.addMinutes(lo, period);
             case 'h':
-                return Timestamps.addHours(lo, period);
+                return NanoTimestamps.addHours(lo, period);
             case 'd':
-                return Timestamps.addDays(lo, period);
+                return NanoTimestamps.addDays(lo, period);
             case 'w':
-                return Timestamps.addWeeks(lo, period);
+                return NanoTimestamps.addWeeks(lo, period);
             case 'M':
-                return Timestamps.addMonths(lo, period);
+                return NanoTimestamps.addMonths(lo, period);
             case 'y':
-                return Timestamps.addYear(lo, period);
+                return NanoTimestamps.addYear(lo, period);
             default:
                 return Numbers.LONG_NaN;
         }
     }
 
-    public static long addSeconds(long micros, int seconds) {
-        return micros + seconds * SECOND_MICROS;
+    public static long addSeconds(long nanos, int seconds) {
+        return nanos + seconds * SECOND_NANOS;
     }
 
-    public static long addWeeks(long micros, int weeks) {
-        return micros + weeks * WEEK_MICROS;
+    public static long addWeeks(long nanos, int weeks) {
+        return nanos + weeks * WEEK_NANOS;
     }
 
-    public static long addYear(long micros, int years) {
+    public static long addYear(long nanos, int years) {
         if (years == 0) {
-            return micros;
+            return nanos;
         }
 
-        int y = getYear(micros);
+        int y = getYear(nanos);
         int m;
         boolean leap1 = isLeapYear(y);
         boolean leap2 = isLeapYear(y + years);
 
-        return yearMicros(y + years, leap2)
-                + monthOfYearMicros(m = getMonthOfYear(micros, y, leap1), leap2)
-                + (getDayOfMonth(micros, y, m, leap1) - 1) * DAY_MICROS
-                + getTimeMicros(micros)
-                + (micros < 0 ? 1 : 0);
+        return yearNanos(y + years, leap2)
+                + monthOfYearNanos(m = getMonthOfYear(nanos, y, leap1), leap2)
+                + (getDayOfMonth(nanos, y, m, leap1) - 1) * DAY_NANOS
+                + getTimeNanos(nanos)
+                + (nanos < 0 ? 1 : 0);
 
     }
 
-    public static long ceilDD(long micros) {
+    public static long ceilDD(long nanos) {
         int y, m;
         boolean l;
-        return yearMicros(y = getYear(micros), l = isLeapYear(y))
-                + monthOfYearMicros(m = getMonthOfYear(micros, y, l), l)
-                + (getDayOfMonth(micros, y, m, l) - 1) * DAY_MICROS
-                + 23 * HOUR_MICROS
-                + 59 * MINUTE_MICROS
-                + 59 * SECOND_MICROS
-                + 999999L
+        return yearNanos(y = getYear(nanos), l = isLeapYear(y))
+                + monthOfYearNanos(m = getMonthOfYear(nanos, y, l), l)
+                + (getDayOfMonth(nanos, y, m, l) - 1) * DAY_NANOS
+                + 23 * HOUR_NANOS
+                + 59 * MINUTE_NANOS
+                + 59 * SECOND_NANOS
+                + 999999999L
                 ;
     }
 
-    public static long ceilMM(long micros) {
+    public static long ceilMM(long nanos) {
         int y, m;
         boolean l;
-        return yearMicros(y = getYear(micros), l = isLeapYear(y))
-                + monthOfYearMicros(m = getMonthOfYear(micros, y, l), l)
-                + (getDaysPerMonth(m, l) - 1) * DAY_MICROS
-                + 23 * HOUR_MICROS
-                + 59 * MINUTE_MICROS
-                + 59 * SECOND_MICROS
-                + 999999L
+        return yearNanos(y = getYear(nanos), l = isLeapYear(y))
+                + monthOfYearNanos(m = getMonthOfYear(nanos, y, l), l)
+                + (getDaysPerMonth(m, l) - 1) * DAY_NANOS
+                + 23 * HOUR_NANOS
+                + 59 * MINUTE_NANOS
+                + 59 * SECOND_NANOS
+                + 999999999L
                 ;
     }
 
-    public static long ceilYYYY(long micros) {
+    public static long ceilYYYY(long nanos) {
         int y;
         boolean l;
-        return yearMicros(y = getYear(micros), l = isLeapYear(y))
-                + monthOfYearMicros(12, l)
-                + (DAYS_PER_MONTH[11] - 1) * DAY_MICROS
-                + 23 * HOUR_MICROS
-                + 59 * MINUTE_MICROS
-                + 59 * SECOND_MICROS
-                + 999999L;
+        return yearNanos(y = getYear(nanos), l = isLeapYear(y))
+                + monthOfYearNanos(12, l)
+                + (DAYS_PER_MONTH[11] - 1) * DAY_NANOS
+                + 23 * HOUR_NANOS
+                + 59 * MINUTE_NANOS
+                + 59 * SECOND_NANOS
+                + 999999999L;
     }
 
     public static long endOfYear(int year) {
-        return toMicros(year, 12, 31, 23, 59) + 59 * SECOND_MILLIS + 999999L;
+        return toNanos(year, 12, 31, 23, 59) + 59 * SECOND_MILLIS + 999999999L;
     }
 
-    public static long floorDD(long micros) {
-        return micros - getTimeMicros(micros);
+    public static long floorDD(long nanos) {
+        return nanos - getTimeNanos(nanos);
     }
 
-    public static long floorHH(long micros) {
-        return micros - micros % HOUR_MICROS;
+    public static long floorHH(long nanos) {
+        return nanos - nanos % HOUR_NANOS;
     }
 
-    public static long floorMI(long micros) {
-        return micros - micros % MINUTE_MICROS;
+    public static long floorMI(long nanos) {
+        return nanos - nanos % MINUTE_NANOS;
     }
 
-    public static long floorMM(long micros) {
+    public static long floorMM(long nanos) {
         int y;
         boolean l;
-        return yearMicros(y = getYear(micros), l = isLeapYear(y)) + monthOfYearMicros(getMonthOfYear(micros, y, l), l);
+        return yearNanos(y = getYear(nanos), l = isLeapYear(y)) + monthOfYearNanos(getMonthOfYear(nanos, y, l), l);
     }
 
     public static long floorYYYY(long micros) {
         int y;
-        return yearMicros(y = getYear(micros), isLeapYear(y));
+        return yearNanos(y = getYear(micros), isLeapYear(y));
     }
 
-    public static int getDayOfMonth(long micros, int year, int month, boolean leap) {
-        long yearMicros = yearMicros(year, leap);
-        yearMicros += monthOfYearMicros(month, leap);
-        return (int) ((micros - yearMicros) / DAY_MICROS) + 1;
+    public static int getDayOfMonth(long nanos, int year, int month, boolean leap) {
+        long yearNanos = yearNanos(year, leap);
+        yearNanos += monthOfYearNanos(month, leap);
+        return (int) ((nanos - yearNanos) / DAY_NANOS) + 1;
     }
 
-    public static int getDayOfWeek(long micros) {
+    public static int getDayOfWeek(long nanos) {
         // 1970-01-01 is Thursday.
         long d;
-        if (micros > -1) {
-            d = micros / DAY_MICROS;
+        if (nanos > -1) {
+            d = nanos / DAY_NANOS;
         } else {
-            d = (micros - (DAY_MICROS - 1)) / DAY_MICROS;
+            d = (nanos - (DAY_NANOS - 1)) / DAY_NANOS;
             if (d < -3) {
                 return 7 + (int) ((d + 4) % 7);
             }
@@ -260,13 +267,13 @@ final public class Timestamps {
         return 1 + (int) ((d + 3) % 7);
     }
 
-    public static int getDayOfWeekSundayFirst(long micros) {
+    public static int getDayOfWeekSundayFirst(long nanos) {
         // 1970-01-01 is Thursday.
         long d;
-        if (micros > -1) {
-            d = micros / DAY_MICROS;
+        if (nanos > -1) {
+            d = nanos / DAY_NANOS;
         } else {
-            d = (micros - (DAY_MICROS - 1)) / DAY_MICROS;
+            d = (nanos - (DAY_NANOS - 1)) / DAY_NANOS;
             if (d < -4) {
                 return 7 + (int) ((d + 5) % 7);
             }
@@ -275,49 +282,53 @@ final public class Timestamps {
     }
 
     public static long getDaysBetween(long a, long b) {
-        return Math.abs(a - b) / DAY_MICROS;
+        return Math.abs(a - b) / DAY_NANOS;
     }
 
     public static long getWeeksBetween(long a, long b) {
-        return Math.abs(a - b) / WEEK_MICROS;
+        return Math.abs(a - b) / WEEK_NANOS;
     }
 
-    public static long getMicrosBetween(long a, long b) {
+    public static long getNanosBetween(long a, long b) {
         return Math.abs(a - b);
     }
 
     public static long getMillisBetween(long a, long b) {
-        return Math.abs(a - b) / MILLI_MICROS;
+        return Math.abs(a - b) / MILLI_MICROS / MICROS_NANOS;
+    }
+
+    public static long getMicroBetween(long a, long b) {
+        return Math.abs(a - b) / MICROS_NANOS;
     }
 
     public static long getSecondsBetween(long a, long b) {
-        return Math.abs(a - b) / SECOND_MICROS;
+        return Math.abs(a - b) / SECOND_NANOS;
     }
 
     public static long getMinutesBetween(long a, long b) {
-        return Math.abs(a - b) / MINUTE_MICROS;
+        return Math.abs(a - b) / MINUTE_NANOS;
     }
 
     public static long getHoursBetween(long a, long b) {
-        return Math.abs(a - b) / HOUR_MICROS;
+        return Math.abs(a - b) / HOUR_NANOS;
     }
 
     public static long getPeriodBetween(char type, long start, long end) {
         switch (type) {
             case 's':
-                return Timestamps.getSecondsBetween(start, end);
+                return NanoTimestamps.getSecondsBetween(start, end);
             case 'm':
-                return Timestamps.getMinutesBetween(start, end);
+                return NanoTimestamps.getMinutesBetween(start, end);
             case 'h':
-                return Timestamps.getHoursBetween(start, end);
+                return NanoTimestamps.getHoursBetween(start, end);
             case 'd':
-                return Timestamps.getDaysBetween(start, end);
+                return NanoTimestamps.getDaysBetween(start, end);
             case 'w':
-                return Timestamps.getWeeksBetween(start, end);
+                return NanoTimestamps.getWeeksBetween(start, end);
             case 'M':
-                return Timestamps.getMonthsBetween(start, end);
+                return NanoTimestamps.getMonthsBetween(start, end);
             case 'y':
-                return Timestamps.getYearsBetween(start, end);
+                return NanoTimestamps.getYearsBetween(start, end);
             default:
                 return Numbers.LONG_NaN;
         }
@@ -334,19 +345,19 @@ final public class Timestamps {
         return leap & m == 2 ? 29 : DAYS_PER_MONTH[m - 1];
     }
 
-    public static int getHourOfDay0(long micros) {
-        if (micros > -1) {
-            return (int) ((micros / HOUR_MICROS) % DAY_HOURS);
+    public static int getHourOfDay0(long nanos) {
+        if (nanos > -1) {
+            return (int) ((nanos / HOUR_NANOS) % DAY_HOURS);
         } else {
-            return DAY_HOURS - 1 + (int) (((micros + 1) / HOUR_MICROS) % DAY_HOURS);
+            return DAY_HOURS - 1 + (int) (((nanos + 1) / HOUR_NANOS) % DAY_HOURS);
         }
     }
 
-    public static int getHourOfDay(long micros) {
-        if (micros > -1) {
-            return (int) ((micros / HOUR_MICROS) % DAY_HOURS);
+    public static int getHourOfDay(long nanos) {
+        if (nanos > -1) {
+            return (int) ((nanos / HOUR_NANOS) % DAY_HOURS);
         } else {
-            return DAY_HOURS - 1 + (int) (((micros + 1) / HOUR_MICROS) % DAY_HOURS);
+            return DAY_HOURS - 1 + (int) (((nanos + 1) / HOUR_NANOS) % DAY_HOURS);
         }
 
         // branchless version of the above
@@ -358,40 +369,49 @@ final public class Timestamps {
 //        return (int) res;
     }
 
-    public static int getMicrosOfSecond(long micros) {
-        if (micros > -1) {
-            return (int) (micros % MILLI_MICROS);
+    //!@#$
+    public static int getNanosOfSecond(long nanos) {
+        if (nanos > -1) {
+            return (int) (nanos % MILLI_NANOS);
         } else {
-            return MILLI_MICROS - 1 + (int) ((micros + 1) % MILLI_MICROS);
+            return MILLI_NANOS - 1 + (int) ((nanos + 1) % MILLI_NANOS);
         }
     }
 
-    public static int getMillisOfSecond(long micros) {
-        if (micros > -1) {
-            return (int) ((micros / MILLI_MICROS) % SECOND_MILLIS);
+    public static int getMicrosOfSecond(long nanos) {
+        if (nanos > -1) {
+            return (int) (nanos % MILLI_NANOS);
         } else {
-            return SECOND_MILLIS - 1 + (int) (((micros + 1) / MILLI_MICROS) % SECOND_MILLIS);
+            return MILLI_NANOS - 1 + (int) ((nanos + 1) % MILLI_NANOS);
         }
     }
 
-    public static int getMinuteOfHour(long micros) {
-        if (micros > -1) {
-            return (int) ((micros / MINUTE_MICROS) % HOUR_MINUTES);
+    public static int getMillisOfSecond(long nanos) {
+        if (nanos > -1) {
+            return (int) ((nanos / MILLI_NANOS) % SECOND_MILLIS);
         } else {
-            return HOUR_MINUTES - 1 + (int) (((micros + 1) / MINUTE_MICROS) % HOUR_MINUTES);
+            return SECOND_MILLIS - 1 + (int) (((nanos + 1) / MILLI_NANOS) % SECOND_MILLIS);
+        }
+    }
+
+    public static int getMinuteOfHour(long nanos) {
+        if (nanos > -1) {
+            return (int) ((nanos / MINUTE_NANOS) % HOUR_MINUTES);
+        } else {
+            return HOUR_MINUTES - 1 + (int) (((nanos + 1) / MINUTE_NANOS) % HOUR_MINUTES);
         }
     }
 
     /**
-     * Calculates month of year from absolute micros.
+     * Calculates month of year from absolute nanos.
      *
-     * @param micros micros since 1970
+     * @param nanos nanos since 1970
      * @param year   year of month
      * @param leap   true if year was leap
      * @return month of year
      */
-    public static int getMonthOfYear(long micros, int year, boolean leap) {
-        int i = (int) (((micros - yearMicros(year, leap)) / 1000) >> 10);
+    public static int getMonthOfYear(long nanos, int year, boolean leap) {
+        int i = (int) (((nanos - yearNanos(year, leap)) / 1000) >> 10);
         return leap
                 ? ((i < 182 * 84375)
                 ? ((i < 91 * 84375)
@@ -421,8 +441,8 @@ final public class Timestamps {
         int aMonth = getMonthOfYear(a, aYear, aLeap);
         int bMonth = getMonthOfYear(b, bYear, bLeap);
 
-        long aResidual = a - yearMicros(aYear, aLeap) - monthOfYearMicros(aMonth, aLeap);
-        long bResidual = b - yearMicros(bYear, bLeap) - monthOfYearMicros(bMonth, bLeap);
+        long aResidual = a - yearNanos(aYear, aLeap) - monthOfYearNanos(aMonth, aLeap);
+        long bResidual = b - yearNanos(bYear, bLeap) - monthOfYearNanos(bMonth, bLeap);
         long months = 12 * (bYear - aYear) + (bMonth - aMonth);
 
         if (aResidual > bResidual) {
@@ -441,27 +461,27 @@ final public class Timestamps {
     }
 
     /**
-     * Calculates year number from micros.
+     * Calculates year number from nanos.
      *
-     * @param micros time micros.
+     * @param nanos time nanos.
      * @return year
      */
-    public static int getYear(long micros) {
-        long mid = (micros >> 1) + HALF_EPOCH_MICROS;
-        if (mid < 0) {
-            mid = mid - HALF_YEAR_MICROS + 1;
+    public static int getYear(long nanos) {
+        BigInteger mid = HALF_EPOCH_NANOS_BIG.add(BigInteger.valueOf((nanos >> 1)));
+        if (mid.compareTo(BigInteger.ZERO) < 0) {
+            mid = mid.subtract(BigInteger.valueOf(HALF_YEAR_NANOS)).add(BigInteger.ONE);
         }
-        int year = (int) (mid / HALF_YEAR_MICROS);
+        int year = (int) (mid.divide(BigInteger.valueOf(HALF_YEAR_NANOS))).intValue();
 
         boolean leap = isLeapYear(year);
-        long yearStart = yearMicros(year, leap);
-        long diff = micros - yearStart;
+        long yearStart = yearNanos(year, leap);
+        long diff = nanos - yearStart;
 
         if (diff < 0) {
             year--;
-        } else if (diff >= YEAR_MICROS) {
-            yearStart += leap ? LEAP_YEAR_MICROS : YEAR_MICROS;
-            if (yearStart <= micros) {
+        } else if (diff >= YEAR_NANOS) {
+            yearStart += leap ? LEAP_YEAR_NANOS : YEAR_NANOS;
+            if (yearStart <= nanos) {
                 year++;
             }
         }
@@ -485,20 +505,20 @@ final public class Timestamps {
         return ((year & 3) == 0) && ((year % 100) != 0 || (year % 400) == 0);
     }
 
-    public static long monthOfYearMicros(int month, boolean leap) {
-        return leap ? MAX_MONTH_OF_YEAR_MICROS[month - 1] : MIN_MONTH_OF_YEAR_MICROS[month - 1];
+    public static long monthOfYearNanos(int month, boolean leap) {
+        return leap ? MAX_MONTH_OF_YEAR_NANOS[month - 1] : MIN_MONTH_OF_YEAR_NANOS[month - 1];
     }
 
-    public static long nextOrSameDayOfWeek(long micros, int dow) {
-        int thisDow = getDayOfWeek(micros);
+    public static long nextOrSameDayOfWeek(long nanos, int dow) {
+        int thisDow = getDayOfWeek(nanos);
         if (thisDow == dow) {
-            return micros;
+            return nanos;
         }
 
         if (thisDow < dow) {
-            return micros + (dow - thisDow) * DAY_MICROS;
+            return nanos + (dow - thisDow) * DAY_NANOS;
         } else {
-            return micros + (7 - (thisDow - dow)) * DAY_MICROS;
+            return nanos + (7 - (thisDow - dow)) * DAY_NANOS;
         }
     }
 
@@ -625,42 +645,42 @@ final public class Timestamps {
         }
     }
 
-    public static long previousOrSameDayOfWeek(long micros, int dow) {
-        int thisDow = getDayOfWeek(micros);
+    public static long previousOrSameDayOfWeek(long nanos, int dow) {
+        int thisDow = getDayOfWeek(nanos);
         if (thisDow == dow) {
-            return micros;
+            return nanos;
         }
 
         if (thisDow < dow) {
-            return micros - (7 + (thisDow - dow)) * DAY_MICROS;
+            return nanos - (7 + (thisDow - dow)) * DAY_NANOS;
         } else {
-            return micros - (thisDow - dow) * DAY_MICROS;
+            return nanos - (thisDow - dow) * DAY_NANOS;
         }
     }
 
-    public static long toMicros(int y, int m, int d, int h, int mi) {
-        return toMicros(y, isLeapYear(y), m, d, h, mi);
+    public static long toNanos(int y, int m, int d, int h, int mi) {
+        return toNanos(y, isLeapYear(y), m, d, h, mi);
     }
 
-    public static long toMicros(int y, boolean leap, int m, int d, int h, int mi) {
-        return yearMicros(y, leap) + monthOfYearMicros(m, leap) + (d - 1) * DAY_MICROS + h * HOUR_MICROS + mi * MINUTE_MICROS;
+    public static long toNanos(int y, boolean leap, int m, int d, int h, int mi) {
+        return yearNanos(y, leap) + monthOfYearNanos(m, leap) + (d - 1) * DAY_NANOS + h * HOUR_NANOS + mi * MINUTE_NANOS;
     }
 
-    public static String toString(long micros) {
+    public static String toString(long nanos) {
         CharSink sink = Misc.getThreadLocalBuilder();
-        TimestampFormatUtils.appendDateTime(sink, micros);
+        NanoTimestampFormatUtils.appendDateTime(sink, nanos);
         return sink.toString();
     }
 
     /**
-     * Calculated start of year in micros. For example of year 2008 this is
+     * Calculated start of year in nanos. For example of year 2008 this is
      * equivalent to parsing "2008-01-01T00:00:00.000Z", except this method is faster.
      *
      * @param year the year
      * @param leap true if give year is leap year
-     * @return micros for start of year.
+     * @return nanos for start of year.
      */
-    public static long yearMicros(int year, boolean leap) {
+    public static long yearNanos(int year, boolean leap) {
         int leapYears = year / 100;
         if (year < 0) {
             leapYears = ((year + 3) >> 2) - leapYears + ((leapYears + 3) >> 2) - 1;
@@ -671,20 +691,20 @@ final public class Timestamps {
             }
         }
 
-        return (year * 365L + (leapYears - DAYS_0000_TO_1970)) * DAY_MICROS;
+        return (year * 365L + (leapYears - DAYS_0000_TO_1970)) * DAY_NANOS;
     }
 
     private static boolean isDigit(char c) {
         return c > BEFORE_ZERO && c < AFTER_NINE;
     }
 
-    private static long getTimeMicros(long micros) {
-        return micros < 0 ? DAY_MICROS - 1 + (micros % DAY_MICROS) : micros % DAY_MICROS;
+    private static long getTimeNanos(long nanos) {
+        return nanos < 0 ? DAY_NANOS - 1 + (nanos % DAY_NANOS) : nanos % DAY_NANOS;
     }
 
-    private static long toMicros(int y, int m, int d) {
+    private static long toNanos(int y, int m, int d) {
         boolean l = isLeapYear(y);
-        return yearMicros(y, l) + monthOfYearMicros(m, l) + (d - 1) * DAY_MICROS;
+        return yearNanos(y, l) + monthOfYearNanos(m, l) + (d - 1) * DAY_NANOS;
     }
 
     @FunctionalInterface

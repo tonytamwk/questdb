@@ -22,7 +22,7 @@
  *
  ******************************************************************************/
 
-package io.questdb.std.microtime;
+package io.questdb.std.nanotime;
 
 import io.questdb.std.Chars;
 import io.questdb.std.Numbers;
@@ -30,16 +30,17 @@ import io.questdb.std.NumericException;
 import io.questdb.std.Os;
 import io.questdb.std.str.CharSink;
 
-public class TimestampFormatUtils {
+public class NanoTimestampFormatUtils {
     public static final int HOUR_24 = 2;
     public static final int HOUR_PM = 1;
     public static final int HOUR_AM = 0;
-    public static final TimestampFormat UTC_FORMAT;
-    public static final TimestampFormat USEC_UTC_FORMAT;
-    public static final TimestampFormat PG_TIMESTAMP_FORMAT;
+    public static final NanoTimestampFormat UTC_FORMAT;
+    public static final NanoTimestampFormat USEC_UTC_FORMAT;
+    public static final NanoTimestampFormat NSEC_UTC_FORMAT;
+    public static final NanoTimestampFormat PG_TIMESTAMP_FORMAT;
     public static final String UTC_PATTERN = "yyyy-MM-ddTHH:mm:ss.SSSz";
-    public static final TimestampLocale enLocale = TimestampLocaleFactory.INSTANCE.getLocale("en");
-    private static final TimestampFormat HTTP_FORMAT;
+    public static final NanoTimestampLocale enLocale = NanoTimestampLocaleFactory.INSTANCE.getLocale("en");
+    private static final NanoTimestampFormat HTTP_FORMAT;
     static long referenceYear;
     static int thisCenturyLimit;
     static int thisCenturyLow;
@@ -53,6 +54,7 @@ public class TimestampFormatUtils {
         UTC_FORMAT = compiler.compile(UTC_PATTERN);
         HTTP_FORMAT = compiler.compile("E, d MMM yyyy HH:mm:ss Z");
         USEC_UTC_FORMAT = compiler.compile("yyyy-MM-ddTHH:mm:ss.SSSUUUz");
+        NSEC_UTC_FORMAT = compiler.compile("yyyy-MM-ddTHH:mm:ss.SSSUUUNNNz");
         PG_TIMESTAMP_FORMAT = compiler.compile("yyyy-MM-dd HH:mm:ss.SSSUUU");
     }
 
@@ -86,11 +88,11 @@ public class TimestampFormatUtils {
     }
 
     // YYYY-MM-DDThh:mm:ss.mmmZ
-    public static void appendDateTime(CharSink sink, long micros) {
-        if (micros == Long.MIN_VALUE) {
+    public static void appendDateTime(CharSink sink, long nanos) {
+        if (nanos == Long.MIN_VALUE) {
             return;
         }
-        UTC_FORMAT.format(micros, null, "Z", sink);
+        UTC_FORMAT.format(nanos, null, "Z", sink);
     }
 
     // YYYY-MM-DDThh:mm:ss.mmmuuuZ
@@ -101,36 +103,44 @@ public class TimestampFormatUtils {
         USEC_UTC_FORMAT.format(micros, null, "Z", sink);
     }
 
-    // YYYY-MM-DD
-    public static void formatDashYYYYMMDD(CharSink sink, long micros) {
-        int y = Timestamps.getYear(micros);
-        boolean l = Timestamps.isLeapYear(y);
-        int m = Timestamps.getMonthOfYear(micros, y, l);
-        Numbers.append(sink, y);
-        append0(sink.put('-'), m);
-        append0(sink.put('-'), Timestamps.getDayOfMonth(micros, y, m, l));
+    // YYYY-MM-DDThh:mm:ss.mmmuuunnnZ
+    public static void appendDateTimeNSec(CharSink sink, long nanos) {
+        if (nanos == Long.MIN_VALUE) {
+            return;
+        }
+        NSEC_UTC_FORMAT.format(nanos, null, "Z", sink);
     }
 
-    public static void formatHTTP(CharSink sink, long micros) {
-        HTTP_FORMAT.format(micros, enLocale, "GMT", sink);
+    // YYYY-MM-DD
+    public static void formatDashYYYYMMDD(CharSink sink, long nanos) {
+        int y = NanoTimestamps.getYear(nanos);
+        boolean l = NanoTimestamps.isLeapYear(y);
+        int m = NanoTimestamps.getMonthOfYear(nanos, y, l);
+        Numbers.append(sink, y);
+        append0(sink.put('-'), m);
+        append0(sink.put('-'), NanoTimestamps.getDayOfMonth(nanos, y, m, l));
+    }
+
+    public static void formatHTTP(CharSink sink, long nanos) {
+        HTTP_FORMAT.format(nanos, enLocale, "GMT", sink);
     }
 
     // YYYY-MM
-    public static void formatYYYYMM(CharSink sink, long micros) {
-        int y = Timestamps.getYear(micros);
-        int m = Timestamps.getMonthOfYear(micros, y, Timestamps.isLeapYear(y));
+    public static void formatYYYYMM(CharSink sink, long nanos) {
+        int y = NanoTimestamps.getYear(nanos);
+        int m = NanoTimestamps.getMonthOfYear(nanos, y, NanoTimestamps.isLeapYear(y));
         Numbers.append(sink, y);
         append0(sink.put('-'), m);
     }
 
     // YYYYMMDD
-    public static void formatYYYYMMDD(CharSink sink, long micros) {
-        int y = Timestamps.getYear(micros);
-        boolean l = Timestamps.isLeapYear(y);
-        int m = Timestamps.getMonthOfYear(micros, y, l);
+    public static void formatYYYYMMDD(CharSink sink, long nanos) {
+        int y = NanoTimestamps.getYear(nanos);
+        boolean l = NanoTimestamps.isLeapYear(y);
+        int m = NanoTimestamps.getMonthOfYear(nanos, y, l);
         Numbers.append(sink, y);
         append0(sink, m);
-        append0(sink, Timestamps.getDayOfMonth(micros, y, m, l));
+        append0(sink, NanoTimestamps.getDayOfMonth(nanos, y, m, l));
     }
 
     public static long getReferenceYear() {
@@ -151,10 +161,10 @@ public class TimestampFormatUtils {
         return parseDateTime(s, lo, lim);
     }
 
-    public static void updateReferenceYear(long micros) {
-        referenceYear = micros;
+    public static void updateReferenceYear(long nanos) {
+        referenceYear = nanos;
 
-        int referenceYear = Timestamps.getYear(micros);
+        int referenceYear = NanoTimestamps.getYear(nanos);
         int centuryOffset = referenceYear % 100;
         thisCenturyLimit = centuryOffset + 20;
         if (thisCenturyLimit > 100) {
@@ -164,10 +174,10 @@ public class TimestampFormatUtils {
             thisCenturyLow = referenceYear - centuryOffset;
         }
         prevCenturyLow = thisCenturyLow - 100;
-        newYear = Timestamps.endOfYear(referenceYear);
+        newYear = NanoTimestamps.endOfYear(referenceYear);
     }
 
-    static void appendAmPm(CharSink sink, int hour, TimestampLocale locale) {
+    static void appendAmPm(CharSink sink, int hour, NanoTimestampLocale locale) {
         if (hour < 12) {
             sink.put(locale.getAMPM(0));
         } else {
@@ -212,7 +222,7 @@ public class TimestampFormatUtils {
     }
 
     static long compute(
-            TimestampLocale locale,
+            NanoTimestampLocale locale,
             int era,
             int year,
             int month,
@@ -222,6 +232,7 @@ public class TimestampFormatUtils {
             int second,
             int millis,
             int micros,
+            int nanos,
             int timezone,
             long offset,
             int hourType) throws NumericException {
@@ -230,7 +241,7 @@ public class TimestampFormatUtils {
             year = -(year - 1);
         }
 
-        boolean leap = Timestamps.isLeapYear(year);
+        boolean leap = NanoTimestamps.isLeapYear(year);
 
         // wrong month
         if (month < 1 || month > 12) {
@@ -254,7 +265,7 @@ public class TimestampFormatUtils {
         }
 
         // wrong day of month
-        if (day < 1 || day > Timestamps.getDaysPerMonth(month, leap)) {
+        if (day < 1 || day > NanoTimestamps.getDaysPerMonth(month, leap)) {
             throw NumericException.INSTANCE;
         }
 
@@ -266,14 +277,15 @@ public class TimestampFormatUtils {
             throw NumericException.INSTANCE;
         }
 
-        long datetime = Timestamps.yearMicros(year, leap)
-                + Timestamps.monthOfYearMicros(month, leap)
-                + (day - 1) * Timestamps.DAY_MICROS
-                + hour * Timestamps.HOUR_MICROS
-                + minute * Timestamps.MINUTE_MICROS
-                + second * Timestamps.SECOND_MICROS
-                + millis * Timestamps.MILLI_MICROS
-                + micros;
+        long datetime = NanoTimestamps.yearNanos(year, leap)
+                + NanoTimestamps.monthOfYearNanos(month, leap)
+                + (day - 1) * NanoTimestamps.DAY_NANOS
+                + hour * NanoTimestamps.HOUR_NANOS
+                + minute * NanoTimestamps.MINUTE_NANOS
+                + second * NanoTimestamps.SECOND_MICROS
+                + millis * NanoTimestamps.MILLI_MICROS
+                + micros * NanoTimestamps.MICROS_NANOS
+                + nanos;
 
         if (timezone > -1) {
             datetime -= locale.getZoneRules(timezone).getOffset(datetime, year, leap);
@@ -333,7 +345,7 @@ public class TimestampFormatUtils {
         }
     }
 
-    static void appendEra(CharSink sink, int year, TimestampLocale locale) {
+    static void appendEra(CharSink sink, int year, NanoTimestampLocale locale) {
         if (year < 0) {
             sink.put(locale.getEra(0));
         } else {
@@ -342,8 +354,8 @@ public class TimestampFormatUtils {
     }
 
     private static long parseDateTime(CharSequence seq, int lo, int lim) throws NumericException {
-        if (lim - lo == 27) {
-            return USEC_UTC_FORMAT.parse(seq, lo, lim, enLocale);
+        if (lim - lo == 30) {
+            return NSEC_UTC_FORMAT.parse(seq, lo, lim, enLocale);
         } else {
             return UTC_FORMAT.parse(seq, lo, lim, enLocale);
         }

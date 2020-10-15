@@ -28,13 +28,13 @@ import io.questdb.cairo.ColumnType;
 import io.questdb.cairo.TableWriter;
 import io.questdb.std.Mutable;
 import io.questdb.std.NumericException;
-import io.questdb.std.microtime.TimestampFormat;
-import io.questdb.std.microtime.TimestampLocale;
+import io.questdb.std.nanotime.NanoTimestampFormat;
+import io.questdb.std.nanotime.NanoTimestampLocale;
 import io.questdb.std.str.DirectByteCharSequence;
 
 public class NanoTimestampAdapter extends AbstractTypeAdapter implements Mutable {
-    private TimestampLocale locale;
-    private TimestampFormat format;
+    private NanoTimestampLocale locale;
+    private NanoTimestampFormat format;
 
     @Override
     public void clear() {
@@ -68,7 +68,7 @@ public class NanoTimestampAdapter extends AbstractTypeAdapter implements Mutable
         return format.parse(value, locale);
     }
 
-    public NanoTimestampAdapter of(TimestampFormat format, TimestampLocale locale) {
+    public NanoTimestampAdapter of(NanoTimestampFormat format, NanoTimestampLocale locale) {
         this.format = format;
         this.locale = locale;
         return this;

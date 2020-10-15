@@ -29,6 +29,7 @@ import io.questdb.std.Numbers;
 import io.questdb.std.ObjHashSet;
 import io.questdb.std.Sinkable;
 import io.questdb.std.microtime.TimestampFormatUtils;
+import io.questdb.std.nanotime.NanoTimestampFormatUtils;
 
 import java.util.Set;
 
@@ -152,7 +153,7 @@ public abstract class AbstractCharSink implements CharSink {
 
     @Override
     public CharSink putISODateNanos(long value) {
-        TimestampFormatUtils.appendDateTimeNSec(this, value);
+        NanoTimestampFormatUtils.appendDateTimeNSec(this, value);
         return this;
     }
 
